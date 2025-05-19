@@ -108,3 +108,44 @@ func TestHeapStrings(t *testing.T) {
 		})
 	}
 }
+
+func FuzzHeapInts(f *testing.F) {
+	seeds := [][]int{
+		{1, 2, 3, 4, 5},
+		{5, 4, 3, 2, 1},
+		{4, 3, 5, 1, 2},
+		{0, -0, -459, 1234567890, -1234567890},
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed[0], seed[1], seed[2], seed[3], seed[4])
+	}
+
+	f.Fuzz(func(t *testing.T, one, two, three, four, five int) {
+		t.Parallel()
+
+		testCase := []int{one, two, three, four, five}
+		t.Run("New", testNew(testCase))
+		t.Run("Push", testPush(testCase))
+	})
+}
+
+func FuzzHeapStrings(f *testing.F) {
+	seeds := [][]string{
+		{"apple", "banana", "cherry", "date", "elderberry"},
+		{"elderberry", "date", "cherry", "banana", "apple"},
+		{"cherry", "banana", "elderberry", "apple", "date"},
+		{"apple", "apple", "banana", "cherry", "date"},
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed[0], seed[1], seed[2], seed[3], seed[4])
+	}
+	f.Fuzz(func(t *testing.T, one, two, three, four, five string) {
+		t.Parallel()
+
+		testCase := []string{one, two, three, four, five}
+		t.Run("New", testNew(testCase))
+		t.Run("Push", testPush(testCase))
+	})
+}

@@ -42,6 +42,48 @@ type conHeap[E any] struct {
 	Heap[E]
 }
 
+func (h *conHeap[E]) Push(x E) {
+	h.mut.Lock()
+	defer h.mut.Unlock()
+	h.Heap.Push(x)
+}
+
+func (h *conHeap[E]) Pop() E {
+	h.mut.Lock()
+	defer h.mut.Unlock()
+	return h.Heap.Pop()
+}
+
+func (h *conHeap[E]) Peek() E {
+	h.mut.Lock()
+	defer h.mut.Unlock()
+	return h.Heap.Peek()
+}
+
+func (h *conHeap[E]) Remove(i int) E {
+	h.mut.Lock()
+	defer h.mut.Unlock()
+	return h.Heap.Remove(i)
+}
+
+func (h *conHeap[E]) Fix(i int) {
+	h.mut.Lock()
+	defer h.mut.Unlock()
+	h.Heap.Fix(i)
+}
+
+// Queue works through the heap in sorted order.
+// Be careful about concurrent use.
+func (h *conHeap[E]) Queue() iter.Seq[E] {
+	return func(yield func(E) bool) {
+		for h.Len() > 0 {
+			if !yield(h.Pop()) {
+				break
+			}
+		}
+	}
+}
+
 // heap is a min-heap of elements of type E.
 // It is not safe for concurrent use.
 type heap[E any] struct {
